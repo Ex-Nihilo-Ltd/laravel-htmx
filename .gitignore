@@ -1,0 +1,8 @@
+/vendor
+
+# Editors
+
+/.fleet
+/.idea
+/.vscode
+/.zed
