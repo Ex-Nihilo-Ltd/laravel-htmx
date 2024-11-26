@@ -1,31 +1,33 @@
 {
-    "version": "dev-1.0.0",
-    "name": "exn/laravel-htmx",
-    "description": "Simple integration package for simpler Htmx adaptaion in the Laravel framework",
-    "type": "library",
-    "license": "MIT",
-    "autoload": {
-        "psr-4": {
-            "Exn\\LaravelHtmx\\": "src/"
-        },
-        "exclude-from-classmap": ["/src/Internal/", "/Tests/", "/test/", "/tests/"]
+  "version": "dev-1.0.0",
+  "name": "exn/laravel-htmx",
+  "description": "Simple integration package for simpler Htmx adaptation in the Laravel framework",
+  "type": "library",
+  "license": "MIT",
+  "autoload": {
+    "psr-4": {
+      "Exn\\LaravelHtmx\\": "src/"
     },
-    "authors": [
-        {
-            "name": "ExN",
-            "email": "contact@exn.rs",
-            "homepage": "https://exndev.com"
-        }
-    ],
-    "require": {
-        "php": "^8.2",
-        "laravel/framework": "^11.0"
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Exn\\LaravelHtmx\\LaravelHtmxServiceProvider"
-            ]
-        }
+    "exclude-from-classmap": [
+      "/src/Internal/"
+    ]
+  },
+  "authors": [
+    {
+      "name": "ExN",
+      "email": "contact@exn.rs",
+      "homepage": "https://exndev.com"
     }
+  ],
+  "require": {
+    "php": "^8.2",
+    "laravel/framework": "^11.31.0.0"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Exn\\LaravelHtmx\\LaravelHtmxServiceProvider"
+      ]
+    }
+  }
 }

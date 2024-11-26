@@ -23,7 +23,7 @@ class HxResponse
    * @param mixed $response
    * @return \Illuminate\Http\Response
    */
-  public static function hxLocation(string $location): Response
+  public static function hxLocation(string|array $location): Response
   {
     return InternalHxResponse::hxLocation(response(), $location);
   }
