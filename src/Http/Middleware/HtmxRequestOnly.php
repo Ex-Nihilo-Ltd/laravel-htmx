@@ -8,20 +8,17 @@ use Symfony\Component\HttpFoundation\Response;
 
 class HtmxRequestOnly
 {
-  /**
-   * Allows only Htmx requests to pass, otherwise aborts request with provided status code (or 404)
-   *
-   * @param \Illuminate\Http\Request $request
-   * @param \Closure $next
-   * @param mixed $statusCode
-   * @return \Symfony\Component\HttpFoundation\Response
-   */
-  public function handle(Request $request, Closure $next, ?int $statusCode = 404): Response
-  {
-    if (!$request->hx()) {
-      abort($statusCode);
-    }
+    /**
+     * Allows only Htmx requests to pass, otherwise aborts request with provided status code (or 404)
+     *
+     * @param  mixed  $statusCode
+     */
+    public function handle(Request $request, Closure $next, ?int $statusCode = 404): Response
+    {
+        if (! $request->hx()) {
+            abort($statusCode);
+        }
 
-    return $next($request);
-  }
+        return $next($request);
+    }
 }

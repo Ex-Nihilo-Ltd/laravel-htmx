@@ -4,70 +4,40 @@ namespace Exn\LaravelHtmx;
 
 use Exn\LaravelHtmx\Http\Middleware\HtmxExceptionRender;
 use Exn\LaravelHtmx\Http\Middleware\HtmxRequestOnly;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
+use Exn\LaravelHtmx\Traits\HxRequestMacros;
+use Exn\LaravelHtmx\Traits\HxResponseMacros;
 use Illuminate\Support\ServiceProvider;
-use ReflectionClass;
-use ReflectionMethod;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 
 class LaravelHtmxServiceProvider extends ServiceProvider
 {
-    public function register()
+    use HxRequestMacros, HxResponseMacros;
+
+    public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/htmx.php', 'htmx');
     }
 
-    public function boot()
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    public function boot(): void
     {
         $this->setUpMiddlewares();
 
         $this->registerRequestMacros();
         $this->registerResponseMacros();
 
-        $this->interceptErrorHandling();
-
         $this->offerPublishing();
     }
 
-    protected function registerRequestMacros(): void
-    {
-        if (!method_exists(Request::class, 'macro')) {
-            return;
-        }
-
-        $reflection = new ReflectionClass(Internal\HxRequest::class);
-        $methods = $reflection->getMethods(ReflectionMethod::IS_STATIC | ReflectionMethod::IS_PUBLIC);
-
-        foreach ($methods as $method) {
-            $methodName = $method->getName();
-
-            // Register macro
-            Request::macro($methodName, function (...$args) use ($methodName) {
-                return Internal\HxRequest::$methodName($this, ...$args);
-            });
-        }
-    }
-
-    protected function registerResponseMacros(): void
-    {
-        if (!method_exists(Response::class, 'macro')) {
-            return;
-        }
-
-        $reflection = new ReflectionClass(Internal\HxResponse::class);
-        $methods = $reflection->getMethods(ReflectionMethod::IS_STATIC | ReflectionMethod::IS_PUBLIC);
-
-        foreach ($methods as $method) {
-            $methodName = $method->getName();
-
-            // Register macro
-            Response::macro($methodName, function (...$args) use ($methodName) {
-                return Internal\HxResponse::$methodName($this, ...$args);
-            });
-        }
-    }
-
-    protected function setUpMiddlewares()
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
+    protected function setUpMiddlewares(): void
     {
         $router = $this->app->get('router');
 
@@ -75,41 +45,13 @@ class LaravelHtmxServiceProvider extends ServiceProvider
         $router->pushMiddlewareToGroup('web', HtmxExceptionRender::class);
     }
 
-    // TODO: handle this better (outside of this class)
-    protected function interceptErrorHandling(): void
-    {
-        /** @var \Illuminate\Foundation\Exceptions\Handler */
-//        $errorHandler = $this->app->get(ExceptionHandler::class);
-//
-//        $errorHandler->renderable(function (Throwable $exception, Request $request) {
-//            // only handle hx requests
-//            if (!$request->hx()) {
-//                return;
-//            }
-//
-//            if ($exception instanceof ValidationException) {
-//                $hxOnFail = $request->hxValidationFailView();
-//
-//                if ($hxOnFail) {
-//                    $request->flash();
-//                    $view = View::make(
-//                        is_string($hxOnFail) ? $hxOnFail : $hxOnFail['view'],
-//                        is_string($hxOnFail) ? [] : $hxOnFail['data']
-//                    )->withErrors($exception->errors(), $request->input('_error_bag', $exception->errorBag));
-//
-//                    return response($view, 422);
-//                }
-//            }
-//        });
-    }
-
     protected function offerPublishing(): void
     {
-        if (!$this->app->runningInConsole()) {
+        if (! $this->app->runningInConsole()) {
             return;
         }
 
-        if (!function_exists('config_path')) {
+        if (! function_exists('config_path')) {
             // function not available and 'publish' not relevant in Lumen
             return;
         }

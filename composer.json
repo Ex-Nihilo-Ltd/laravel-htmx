@@ -23,6 +23,10 @@
     "php": "^8.2",
     "laravel/framework": "^11.31.0.0"
   },
+  "require-dev": {
+    "laravel/pint": "^1.18",
+    "barryvdh/laravel-ide-helper": "^3.2"
+  },
   "extra": {
     "laravel": {
       "providers": [
