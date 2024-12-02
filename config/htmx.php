@@ -22,7 +22,7 @@ return [
             ],
             'dev' => [
                 '5xx' => [
-                    'type' => 'full-page',
+                    'type' => 'full:page',
                 ],
                 '4xx' => [
                     'eventType' => [

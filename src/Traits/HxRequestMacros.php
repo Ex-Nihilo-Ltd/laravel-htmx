@@ -117,5 +117,17 @@ trait HxRequestMacros
         Request::macro('hxValidationFailView', function (): string|array|null {
             return $this->input(HxRequestConstants::_HX_ON_VALIDATION_FAIL_KEY, null);
         });
+
+        /**
+         * Helper method to decide whether request should return back just a htmx partial or a full page
+         *
+         * Return value will be true if the request has HX-Request header and doesn't have any of the
+         * HX-Boosted or HX-History-Restore-Request headers
+         *
+         * @return bool if the request is expecting htmx partial or a full page
+         */
+        Request::macro('hxPartialRequest', function (): bool {
+            return $this->hx() && ! ($this->hxBoosted() || $this->hxHistoryRestoreRequest());
+        });
     }
 }
