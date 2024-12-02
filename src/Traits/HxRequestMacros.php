@@ -122,12 +122,17 @@ trait HxRequestMacros
          * Helper method to decide whether request should return back just a htmx partial or a full page
          *
          * Return value will be true if the request has HX-Request header and doesn't have any of the
-         * HX-Boosted or HX-History-Restore-Request headers
+         * HX-Boosted or HX-History-Restore-Request headers or if it wasn't a HX-Redirect
+         * (our middleware flashes to session custom key to indicate redirection was made through htmx)
          *
          * @return bool if the request is expecting htmx partial or a full page
          */
         Request::macro('hxPartialRequest', function (): bool {
-            return $this->hx() && ! ($this->hxBoosted() || $this->hxHistoryRestoreRequest());
+            return $this->hx() && ! (
+                $this->hxBoosted()
+                || $this->hxHistoryRestoreRequest()
+                || $this->session()->has(HxRequestConstants::_HX_REDIRECTED)
+            );
         });
     }
 }

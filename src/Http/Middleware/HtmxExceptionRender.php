@@ -3,6 +3,7 @@
 namespace Exn\LaravelHtmx\Http\Middleware;
 
 use Closure;
+use Exn\LaravelHtmx\Constants\HxRequestConstants;
 use Illuminate\Contracts\View\Factory as ViewFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -79,6 +80,8 @@ class HtmxExceptionRender
     protected function handleRedirectResponse(mixed $response)
     {
         if ($response->isRedirect()) {
+            session()->flash(HxRequestConstants::_HX_REDIRECTED);
+
             return $this->responseAsFullPage(
                 response($response->getContent())
                     ->hxLocation($response->getTargetUrl())

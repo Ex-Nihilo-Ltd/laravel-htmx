@@ -21,4 +21,5 @@ final class HxRequestConstants
     public const HX_HISTORY_RESTORE_REQUEST = 'HX-History-Restore-Request';
 
     public const _HX_ON_VALIDATION_FAIL_KEY = '_hx_on_validation_fail';
+    const _HX_REDIRECTED = '_hx_redirected';
 }
