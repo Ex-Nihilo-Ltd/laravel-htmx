@@ -11,7 +11,7 @@ use Illuminate\Support\ViewErrorBag;
 use Illuminate\Validation\ValidationException;
 use View;
 
-class HtmxExceptionRender
+class HtmxResponseAdapter
 {
     /**
      * The view factory implementation.
@@ -56,7 +56,7 @@ class HtmxExceptionRender
         return $response;
     }
 
-    protected function handleResponseException(Request $request, mixed $response): mixed
+    protected function handleResponseException(Request $request, mixed $response): ?Response
     {
         $exception = $response->exception;
         if ($exception instanceof ValidationException) {
@@ -70,7 +70,7 @@ class HtmxExceptionRender
 
                 $this->syncSessionWithImmediateResponse($request);
 
-                return response($view);
+                return response($view, is_array($hxOnFail) ? $hxOnFail['status'] : 200);
             }
         }
 
@@ -95,12 +95,12 @@ class HtmxExceptionRender
     {
         $statusCode = $response->getStatusCode();
 
-        $handlingType = config('htmx.errors.defaultHandling');
+        $handlingType = config('htmx.errors.handling');
         $eventType = config('htmx.errors.eventType');
         $statusOverride = $this->getStatusOverride($statusCode);
 
         if ($statusOverride) {
-            $handlingType = $statusOverride['type'] ?? $handlingType;
+            $handlingType = $statusOverride['handling'] ?? $handlingType;
             $eventType = $this->mergeEventType($eventType, $statusOverride['eventType'] ?? []);
         }
 
@@ -121,7 +121,7 @@ class HtmxExceptionRender
             ->hxReselect(' ');
     }
 
-    protected function responseEvent(array $event): mixed
+    protected function responseEvent(array $event): Response
     {
         return response()
             ->noContent()
@@ -143,7 +143,7 @@ class HtmxExceptionRender
     }
 
     /**
-     * @return array{type: ?string, eventType: ?array}|null
+     * @return array{handling: ?string, eventType: ?array}|null
      */
     private function getStatusOverride(int $statusCode): ?array
     {
@@ -186,9 +186,13 @@ class HtmxExceptionRender
         foreach ($eventType as $eventTypeKey => $eventTypeValue) {
             $event[$eventTypeKey] = $eventTypeValue;
             if ($eventTypeValue == 'response:text') {
-                $event[$eventTypeKey] = Response::$statusTexts[$response->getStatusCode()];
+                $event[$eventTypeKey] = $response->getStatusCode() == 419
+                    ? 'Page Expired'
+                    : Response::$statusTexts[$response->getStatusCode()] ?? 'Something went wrong';
             } elseif ($eventTypeValue == 'exception:message') {
-                $event[$eventTypeKey] = $response->exception ? $response->exception->getMessage() : 'Something went wrong';
+                $event[$eventTypeKey] = $response->exception
+                    ? $response->exception->getMessage()
+                    : 'Something went wrong';
             } elseif (is_array($eventTypeValue)) {
                 $event[$eventTypeKey] = $this->generateEvent($response, $eventTypeValue);
             }

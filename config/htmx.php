@@ -2,7 +2,7 @@
 
 return [
     'errors' => [
-        'defaultHandling' => 'send:event', // 'full:page'
+        'handling' => 'send:event', // 'full:page'
         'eventType' => [
             'show-notification' => [
                 'message' => 'response:text',
@@ -11,7 +11,7 @@ return [
         ],
         'statusOverrides' => [
             404 => [
-                'type' => 'full:page',
+                'handling' => 'full:page',
             ],
             403 => [
                 'eventType' => [
@@ -22,7 +22,7 @@ return [
             ],
             'dev' => [
                 '5xx' => [
-                    'type' => 'full:page',
+                    'handling' => 'full:page',
                 ],
                 '4xx' => [
                     'eventType' => [

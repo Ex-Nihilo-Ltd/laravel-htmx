@@ -2,18 +2,19 @@
 
 namespace Exn\LaravelHtmx;
 
-use Exn\LaravelHtmx\Http\Middleware\HtmxExceptionRender;
+use Exn\LaravelHtmx\Http\Middleware\HtmxResponseAdapter;
 use Exn\LaravelHtmx\Http\Middleware\HtmxRequestOnly;
-use Exn\LaravelHtmx\Traits\HxRequestMacros;
-use Exn\LaravelHtmx\Traits\HxResponseMacros;
+use Exn\LaravelHtmx\Mixins\HxRequestMixin;
+use Exn\LaravelHtmx\Mixins\HxResponseMixin;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\ServiceProvider;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
+use ReflectionException;
 
 class LaravelHtmxServiceProvider extends ServiceProvider
 {
-    use HxRequestMacros, HxResponseMacros;
-
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/htmx.php', 'htmx');
@@ -22,6 +23,7 @@ class LaravelHtmxServiceProvider extends ServiceProvider
     /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
+     * @throws ReflectionException
      */
     public function boot(): void
     {
@@ -34,6 +36,26 @@ class LaravelHtmxServiceProvider extends ServiceProvider
     }
 
     /**
+     * @throws ReflectionException
+     */
+    protected function registerRequestMacros(): void
+    {
+        if (method_exists(Request::class, 'mixin')) {
+            Request::mixin(new HxRequestMixin);
+        }
+    }
+
+    /**
+     * @throws ReflectionException
+     */
+    protected function registerResponseMacros(): void
+    {
+        if (method_exists(Response::class, 'mixin')) {
+            Response::mixin(new HxResponseMixin);
+        }
+    }
+
+    /**
      * @throws ContainerExceptionInterface
      * @throws NotFoundExceptionInterface
      */
@@ -42,7 +64,7 @@ class LaravelHtmxServiceProvider extends ServiceProvider
         $router = $this->app->get('router');
 
         $router->aliasMiddleware('htmxOnly', HtmxRequestOnly::class);
-        $router->pushMiddlewareToGroup('web', HtmxExceptionRender::class);
+        $router->prependMiddlewareToGroup('web', HtmxResponseAdapter::class);
     }
 
     protected function offerPublishing(): void
