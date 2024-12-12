@@ -70,7 +70,8 @@ class HtmxResponseAdapter
 
                 $this->syncSessionWithImmediateResponse($request);
 
-                return response($view, is_array($hxOnFail) ? $hxOnFail['status'] : 200);
+                return response($view, is_array($hxOnFail) ? $hxOnFail['status'] : 200)
+                    ->withHeaders($response->headers);
             }
         }
 
@@ -83,7 +84,7 @@ class HtmxResponseAdapter
             session()->flash(HxRequestConstants::_HX_REDIRECTED);
 
             return $this->responseAsFullPage(
-                response($response->getContent())
+                $response->setStatusCode(200)
                     ->hxLocation($response->getTargetUrl())
             );
         }
@@ -105,7 +106,7 @@ class HtmxResponseAdapter
         }
 
         if ($handlingType == 'send:event') {
-            return $this->responseEvent($this->generateEvent($response, $eventType));
+            return $this->responseEvent($response, $this->generateEvent($response, $eventType));
         } elseif ($handlingType == 'full:page') {
             return $this->responseAsFullPage($response);
         } else {
@@ -121,10 +122,11 @@ class HtmxResponseAdapter
             ->hxReselect(' ');
     }
 
-    protected function responseEvent(array $event): Response
+    protected function responseEvent(mixed $response, array $event): Response
     {
         return response()
             ->noContent()
+            ->withHeaders($response->headers)
             ->hxTrigger($event);
     }
 
