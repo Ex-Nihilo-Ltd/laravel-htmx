@@ -57,7 +57,7 @@ class HtmxResponseAdapter
         return $response;
     }
 
-    protected function handleResponseException(Request $request, mixed $response): ?SymfonyResponse
+    protected function handleResponseException(Request $request, mixed $response): mixed
     {
         $exception = $response->exception;
         if ($exception instanceof ValidationException) {
@@ -79,7 +79,7 @@ class HtmxResponseAdapter
         return null;
     }
 
-    protected function handleRedirectResponse(mixed $response): ?SymfonyResponse
+    protected function handleRedirectResponse(mixed $response): mixed
     {
         if ($response->isRedirect()) {
             session()->flash(HxRequestConstants::_HX_REDIRECTED);
@@ -93,7 +93,7 @@ class HtmxResponseAdapter
         return null;
     }
 
-    protected function handleErrorResponse(mixed $response): ?SymfonyResponse
+    protected function handleErrorResponse(mixed $response): mixed
     {
         $statusCode = $response->getStatusCode();
 
@@ -115,7 +115,7 @@ class HtmxResponseAdapter
         }
     }
 
-    protected function responseAsFullPage(mixed $response): SymfonyResponse
+    protected function responseAsFullPage(mixed $response): mixed
     {
         return $response
             ->hxRetarget('body')
@@ -123,7 +123,7 @@ class HtmxResponseAdapter
             ->hxReselect(' ');
     }
 
-    protected function responseEvent(mixed $response, array $event): SymfonyResponse
+    protected function responseEvent(mixed $response, array $event): mixed
     {
         return response()
             ->noContent()

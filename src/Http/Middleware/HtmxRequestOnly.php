@@ -4,7 +4,7 @@ namespace Exn\LaravelHtmx\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class HtmxRequestOnly
 {
@@ -13,7 +13,7 @@ class HtmxRequestOnly
      *
      * @param  mixed  $statusCode
      */
-    public function handle(Request $request, Closure $next, ?int $statusCode = 404): Response
+    public function handle(Request $request, Closure $next, ?int $statusCode = 404): SymfonyResponse
     {
         if (! $request->hx()) {
             abort($statusCode);
