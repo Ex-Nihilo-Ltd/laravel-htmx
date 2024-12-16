@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\ViewErrorBag;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 use View;
 
 class HtmxResponseAdapter
@@ -26,12 +27,12 @@ class HtmxResponseAdapter
     /**
      * Handle an incoming request.
      *
-     * @param  Closure(Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (SymfonyResponse)  $next
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): SymfonyResponse
     {
         $response = $next($request);
-        if (! $request->hx() || $response->isOk()) {
+        if (! $request->hx() || $response->isSuccessful()) {
             return $response;
         }
 
@@ -56,7 +57,7 @@ class HtmxResponseAdapter
         return $response;
     }
 
-    protected function handleResponseException(Request $request, mixed $response): ?Response
+    protected function handleResponseException(Request $request, mixed $response): ?SymfonyResponse
     {
         $exception = $response->exception;
         if ($exception instanceof ValidationException) {
@@ -78,7 +79,7 @@ class HtmxResponseAdapter
         return null;
     }
 
-    protected function handleRedirectResponse(mixed $response)
+    protected function handleRedirectResponse(mixed $response): ?SymfonyResponse
     {
         if ($response->isRedirect()) {
             session()->flash(HxRequestConstants::_HX_REDIRECTED);
@@ -92,7 +93,7 @@ class HtmxResponseAdapter
         return null;
     }
 
-    protected function handleErrorResponse(mixed $response)
+    protected function handleErrorResponse(mixed $response): ?SymfonyResponse
     {
         $statusCode = $response->getStatusCode();
 
@@ -114,7 +115,7 @@ class HtmxResponseAdapter
         }
     }
 
-    protected function responseAsFullPage(mixed $response): mixed
+    protected function responseAsFullPage(mixed $response): SymfonyResponse
     {
         return $response
             ->hxRetarget('body')
@@ -122,7 +123,7 @@ class HtmxResponseAdapter
             ->hxReselect(' ');
     }
 
-    protected function responseEvent(mixed $response, array $event): Response
+    protected function responseEvent(mixed $response, array $event): SymfonyResponse
     {
         return response()
             ->noContent()

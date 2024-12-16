@@ -2,12 +2,15 @@
 
 namespace Exn\LaravelHtmx;
 
-use Exn\LaravelHtmx\Http\Middleware\HtmxResponseAdapter;
 use Exn\LaravelHtmx\Http\Middleware\HtmxRequestOnly;
+use Exn\LaravelHtmx\Http\Middleware\HtmxResponseAdapter;
 use Exn\LaravelHtmx\Mixins\HxRequestMixin;
 use Exn\LaravelHtmx\Mixins\HxResponseMixin;
+use Illuminate\Contracts\Http\Kernel;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\NotFoundExceptionInterface;
@@ -52,19 +55,20 @@ class LaravelHtmxServiceProvider extends ServiceProvider
     {
         if (method_exists(Response::class, 'mixin')) {
             Response::mixin(new HxResponseMixin);
+            RedirectResponse::mixin(new HxResponseMixin);
         }
     }
 
     /**
      * @throws ContainerExceptionInterface
-     * @throws NotFoundExceptionInterface
      */
     protected function setUpMiddlewares(): void
     {
-        $router = $this->app->get('router');
+        $kernel = $this->app->make(Kernel::class);
+        $kernel->prependMiddlewareToGroup('web', HtmxResponseAdapter::class);
 
+        $router = $this->app->make(Router::class);
         $router->aliasMiddleware('htmxOnly', HtmxRequestOnly::class);
-        $router->prependMiddlewareToGroup('web', HtmxResponseAdapter::class);
     }
 
     protected function offerPublishing(): void
